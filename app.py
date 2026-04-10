@@ -199,10 +199,11 @@ if arquivo:
     st.markdown("### 📊 Detalhes das Arrecadações")
 
     st.dataframe(
-        df_filtrado.drop(
-            columns=["CAMPO_LIVRE_FILTRO", "CODIGO_RECEITA"],
-            errors="ignore"
-        ),
-        use_container_width=True,
-        height=600
-    )
+     df_filtrado.drop(
+        columns=["CAMPO_LIVRE_FILTRO", "CODIGO_RECEITA"],
+        errors="ignore"
+     ),
+     use_container_width=True,
+     height=600,
+     hide_index=True
+)
