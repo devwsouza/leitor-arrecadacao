@@ -28,9 +28,10 @@ def formatar_valor(valor):
 
 
 # =========================
-# DETALHE CÓDIGO DE BARRAS
+# DETALHE CÓDIGO DE BARRAS (AJUSTADO)
 # =========================
 def detalhar_codigo_barras(codigo):
+    # Removemos a linha da receita daqui, pois ela terá coluna própria
     return (
         f"PRODUTO.............: {codigo[0]}\n"
         f"SEGMENTO............: {codigo[1]}\n"
@@ -39,8 +40,8 @@ def detalhar_codigo_barras(codigo):
         f"VALOR...............: {codigo[4:15]}\n"
         f"CODIGO FEBRABAN IPVA: {codigo[15:19]}\n"
         f"DATA VENCIMENTO.....: {formatar_data(codigo[19:27])}\n"
-        f"NOSSO NUMERO.........: {codigo[27:37]}\n"
-        f"CODIGO RECEITA......: {codigo[37:41]}"
+        f"NOSSO NUMERO.........: {codigo[27:37]}"
+        # A linha da receita foi removida desta string
     )
 
 
@@ -67,29 +68,33 @@ def parse_linha_A(linha):
 # REGISTRO G (DETALHE)
 # =========================
 def parse_linha_G(linha):
-    codigo_barras = campo(linha, 38, 81)
+    codigo_barras_raw = campo(linha, 38, 81)
 
     return {
         "REGISTRO": campo(linha, 1, 1),
         "AGÊNCIA/CONTA": campo(linha, 2, 21).strip(),
         "DATA PAGAMENTO": formatar_data(campo(linha, 22, 29)),
         "DATA CRÉDITO": formatar_data(campo(linha, 30, 37)),
-        "CÓDIGO DE BARRAS": detalhar_codigo_barras(codigo_barras),
+        
+        # Agora exibe o detalhe SEM a receita no texto
+        "CÓDIGO DE BARRAS": detalhar_codigo_barras(codigo_barras_raw),
+        
+        # Coluna separada apenas com o número da receita
+        "CODIGO_RECEITA": codigo_barras_raw[37:41].strip(),
 
         "VALOR RECEBIDO": formatar_valor(campo(linha, 82, 93)),
         "VALOR TARIFA": formatar_valor(campo(linha, 94, 100)),
 
         "NSR": campo(linha, 101, 108),
         "AGÊNCIA ARRECADADORA": campo(linha, 109, 116),
-        "FORMA ARRECADAÇÃO": campo(linha, 117, 117),
+        "FORMA ARRECADADA": campo(linha, 117, 117),
         "AUTENTICAÇÃO": campo(linha, 118, 140).strip(),
         "FORMA PAGAMENTO": campo(linha, 141, 141),
 
         "FILLER": campo(linha, 142, 150),
 
-        # 🔥 CAMPO TÉCNICO PARA FILTRO
-        "CAMPO_LIVRE_FILTRO": codigo_barras[27:].strip(),
-        "CODIGO_RECEITA": codigo_barras[37:41].strip()
+        # 🔥 CAMPO TÉCNICO PARA FILTRO (Nosso Número)
+        "CAMPO_LIVRE_FILTRO": codigo_barras_raw[27:37].strip(),
     }
 
 
